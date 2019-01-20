@@ -45,7 +45,7 @@ function generateItemElement(item, template) {
   
   const itemControlsEdit = `
     <div class="shopping-item-controls">
-      <button class="shopping-item-edit js-item-edit">
+      <button class="shopping-item-edit-save js-item-edit-save">
         <span class="button-label">save</span>
       </button>
       <button class="shopping-item-edit-cancel js-item-edit-cancel">
@@ -79,7 +79,7 @@ function renderShoppingList() {
   if(arr.length > 0) {
     $('.js-shopping-list').html(shoppingListItemsString);
 
-    if(STORE.editing > -1) {
+    if(STORE.editing > 0) {
       //$(`#newname-${STORE.editing}`).val(STORE.items[STORE.editing].name);
       $(`#newname-${STORE.editing}`).val(STORE.items.find(item => item.id === STORE.editing).name);
     }
@@ -127,6 +127,13 @@ function listItemToggleChecked(itemId) {
 
 function listItemEdit(itemId) {
   STORE.editing = itemId;
+}
+
+function listItemEditSave(itemId, newName) {
+  let itemIndex = STORE.items.findIndex(item => item.id === itemId);
+
+  STORE.items[itemIndex].name = newName;
+  STORE.editing = 0;
 }
 
 function listItemCancelEdit() {
@@ -204,6 +211,12 @@ function handleItemEdit() {
     .on('click', '.js-item-edit', event => {
       const itemId = getItemIdFromElement(event.currentTarget);
       listItemEdit(itemId);
+
+      renderShoppingList();
+    })
+    .on('click', '.js-item-edit-save', event => {
+      const itemId = getItemIdFromElement(event.currentTarget);
+      listItemEditSave(itemId, $(`#newname-${itemId}`).val());
 
       renderShoppingList();
     })
