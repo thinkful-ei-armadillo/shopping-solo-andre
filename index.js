@@ -4,14 +4,14 @@
 
 const STORE = {
   items: [
-    {id: 1, name: 'apples', checked: false},
-    {id: 2, name: 'oranges', checked: false},
+    {id: 1, name: 'koolaid', checked: false},
+    {id: 2, name: 'frosted flakes', checked: false},
     {id: 3, name: 'milk', checked: true},
     {id: 4, name: 'bread', checked: false}
   ],
   hideChecked: false, // optionally hide checked items
   searched: false, // if there was a search query 
-  editing: -1, // index of item being edited
+  editing: 0, // id of item being edited
 };
 
 let SEARCH = [];
