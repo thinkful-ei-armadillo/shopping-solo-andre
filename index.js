@@ -52,12 +52,12 @@ function renderShoppingList() {
   let arr = STORE.searched ? SEARCH : STORE.items;
   const shoppingListItemsString = generateShoppingItemsString(arr);
 
-  if(STORE.editing > -1) {
-    $(`#newname-${STORE.editing}`).val(STORE.items[STORE.editing].name);
-  }
-
   if(arr.length > 0) {
     $('.js-shopping-list').html(shoppingListItemsString);
+    
+    if(STORE.editing > -1) {
+      $(`#newname-${STORE.editing}`).val(STORE.items[STORE.editing].name);
+    }
   } else {
     $('.js-shopping-list').html('<p>Didn\'t find anything!</p>');
   }
