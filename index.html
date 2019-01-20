@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Shopping List</title>
+  <title>World's Greatest Shopping List</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
@@ -11,6 +11,14 @@
 <body>
     <div class="container">
         <h1>Shopping List</h1>
+        <h3>By Andre Willie</h3>
+
+        <form id="js-shopping-list-search">
+            <input type="text" name="shopping-list-search" class="js-shopping-list-search" placeholder="search for an item">
+            <button type="submit">Search</button>
+            <button id="shopping-list-search-clear" type="button">Clear</button>
+        </form> <br>
+
         <form id="js-shopping-list-form">
             <label for="shopping-list-entry">Add an item</label>
             <input type="text" name="shopping-list-entry" class="js-shopping-list-entry" placeholder="e.g., broccoli">

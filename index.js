@@ -9,8 +9,11 @@ const STORE = {
     {name: 'milk', checked: true},
     {name: 'bread', checked: false}
   ],
-  hideChecked: false
+  hideChecked: false,
+  searched: false
 };
+
+let SEARCH = [];
 
 // templating
 function generateItemElement(item, itemIndex, template) {
@@ -45,10 +48,15 @@ function generateShoppingItemsString(shoppingList) {
 
 // generate html and write to the DOM
 function renderShoppingList() {
-  const shoppingListItemsString = generateShoppingItemsString(STORE.items);
+  let arr = STORE.searched ? SEARCH : STORE.items;
+  const shoppingListItemsString = generateShoppingItemsString(arr);
   console.log('rendered the shopping list (renderShoppingList)');
 
-  $('.js-shopping-list').html(shoppingListItemsString);
+  if(arr.length > 0) {
+    $('.js-shopping-list').html(shoppingListItemsString);
+  } else {
+    $('.js-shopping-list').html('<p>Didn\'t find anything!</p>');
+  }
 }
 
 // get index of selected DOM element
@@ -71,6 +79,11 @@ function toggleHiddenItems() {
   STORE.hideChecked = !STORE.hideChecked;
 }
 
+function searchShoppingList(arr, query) {
+  STORE.searched = true;
+  SEARCH = arr.filter(item => item.name.indexOf(query) > -1);
+}
+
 // list item functions
 function listItemToggleChecked(itemIndex) {
   console.log(`toggled checked property for item at index ${itemIndex}`);
@@ -82,7 +95,9 @@ function listItemDelete(itemIndex) {
   STORE.items.splice(itemIndex, 1);
 }
 
-// form listener: submit
+
+
+// form listener: add item submit
 function handleNewItemSubmit() {
   $('#js-shopping-list-form').submit(function(event) {
     console.log('add item form submitted (handleNewItemSubmit)');
@@ -101,6 +116,18 @@ function handleOptionHideChecked() {
     console.log('option changed: hide checked items (handleOptionHideChecked)');
 
     toggleHiddenItems();
+    renderShoppingList();
+  });
+}
+
+// form listener: search submit
+function handleSearchSubmit() {
+  $('#js-shopping-list-search').submit(event => {
+    console.log('searched for item (handleSearchSubmit)');
+
+    event.preventDefault();
+
+    searchShoppingList(STORE.items, $('.js-shopping-list-search').val());
     renderShoppingList();
   });
 }
@@ -132,6 +159,7 @@ function handleShoppingList() {
   renderShoppingList();
   handleNewItemSubmit();
   handleOptionHideChecked();
+  handleSearchSubmit();
   handleItemCheck();
   handleItemDelete();
 }
