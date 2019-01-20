@@ -9,17 +9,20 @@ const STORE = {
     {name: 'milk', checked: true},
     {name: 'bread', checked: false}
   ],
-  hideChecked: false,
-  searched: false
+  hideChecked: false, // optionally hide checked items
+  searched: false, // if there was a search query 
+  editing: -1, // index of item being edited
 };
 
 let SEARCH = [];
+
 
 // templating
 function generateItemElement(item, itemIndex, template) {
   return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
-      <span class="shopping-item js-shopping-item ${item.checked ? "shopping-item__checked" : ''}">${item.name}</span>
+      <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
+      <input type="text" class="shopping-item-newname ${STORE.editing === itemIndex ? '':'hidden'} js-shopping-item-newname" id="newname-${itemIndex}">
       <div class="shopping-item-controls">
         <button class="shopping-item-toggle js-item-toggle">
             <span class="button-label">check</span>
@@ -36,8 +39,6 @@ function generateItemElement(item, itemIndex, template) {
 
 // iterate thru our data to create the html for the shopping list
 function generateShoppingItemsString(shoppingList) {
-  console.log('generated the shopping list html');
-
   // if 'hide checked' option is enabled AND an item is checked, return false (filter it out)
   const items = shoppingList
     .filter(item => !(STORE.hideChecked && item.checked))
@@ -50,7 +51,10 @@ function generateShoppingItemsString(shoppingList) {
 function renderShoppingList() {
   let arr = STORE.searched ? SEARCH : STORE.items;
   const shoppingListItemsString = generateShoppingItemsString(arr);
-  console.log('rendered the shopping list (renderShoppingList)');
+
+  if(STORE.editing > -1) {
+    $(`#newname-${STORE.editing}`).val(STORE.items[STORE.editing].name);
+  }
 
   if(arr.length > 0) {
     $('.js-shopping-list').html(shoppingListItemsString);
@@ -70,8 +74,6 @@ function getItemIndexFromElement(el) {
 
 // form functions
 function addItemToShoppingList(itemName) {
-  console.log(`added "${itemName}" to item array`);
-
   STORE.items.push({name: itemName, checked: false});
 }
 
@@ -92,12 +94,14 @@ function searchClear() {
 
 // list item functions
 function listItemToggleChecked(itemIndex) {
-  console.log(`toggled checked property for item at index ${itemIndex}`);
   STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
 }
 
+function listItemEdit(itemIndex) {
+  STORE.editing = itemIndex;
+}
+
 function listItemDelete(itemIndex) {
-  console.log(`Item was removed at index ${itemIndex}`);
   STORE.items.splice(itemIndex, 1);
 }
 
@@ -107,8 +111,6 @@ function listItemDelete(itemIndex) {
 // add item
 function handleNewItemSubmit() {
   $('#js-shopping-list-form').submit(function(event) {
-    console.log('add item form submitted (handleNewItemSubmit)');
-
     addItemToShoppingList($('.js-shopping-list-entry').val());
     event.preventDefault();
     event.currentTarget.reset();
@@ -120,8 +122,6 @@ function handleNewItemSubmit() {
 // hide checked option
 function handleOptionHideChecked() {
   $('#js-shopping-list-form').on('change', '#option-hide-checked', event => {
-    console.log('option changed: hide checked items (handleOptionHideChecked)');
-
     toggleHiddenItems();
     renderShoppingList();
   });
@@ -130,8 +130,6 @@ function handleOptionHideChecked() {
 // search
 function handleSearchSubmit() {
   $('#js-shopping-list-search').submit(event => {
-    console.log('searched for item (handleSearchSubmit)');
-
     event.preventDefault();
 
     searchShoppingList(STORE.items, $('.js-shopping-list-search').val());
@@ -142,8 +140,6 @@ function handleSearchSubmit() {
 // search clear
 function handleSearchClear() {
   $('#js-shopping-list-search').on('click', '.search-clear', event => {
-    console.log('cleared search (handleSearchClear)');
-
     searchClear();
     renderShoppingList();
   });
@@ -152,9 +148,18 @@ function handleSearchClear() {
 // item check off
 function handleItemCheck() {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
-    console.log('check button pressed (handleItemCheckClicked)');
     const itemIndex = getItemIndexFromElement(event.currentTarget);
     listItemToggleChecked(itemIndex);
+
+    renderShoppingList();
+  });
+}
+
+// item edit
+function handleItemEdit() {
+  $('.js-shopping-list').on('click', '.js-item-edit', event => {
+    const itemIndex = getItemIndexFromElement(event.currentTarget);
+    listItemEdit(itemIndex);
 
     renderShoppingList();
   });
@@ -163,7 +168,6 @@ function handleItemCheck() {
 // item delete
 function handleItemDelete() {
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
-    console.log('delete button pressed (handleDeleteItemClicked)');
     const itemIndex = getItemIndexFromElement(event.currentTarget);
     listItemDelete(itemIndex);
 
@@ -179,6 +183,7 @@ function handleShoppingList() {
   handleSearchSubmit();
   handleSearchClear();
   handleItemCheck();
+  handleItemEdit();
   handleItemDelete();
 }
 
