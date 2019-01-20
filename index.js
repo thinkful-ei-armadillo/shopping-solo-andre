@@ -4,10 +4,10 @@
 
 const STORE = {
   items: [
-    {name: 'apples', checked: false},
-    {name: 'oranges', checked: false},
-    {name: 'milk', checked: true},
-    {name: 'bread', checked: false}
+    {id: 1, name: 'apples', checked: false},
+    {id: 2, name: 'oranges', checked: false},
+    {id: 3, name: 'milk', checked: true},
+    {id: 4, name: 'bread', checked: false}
   ],
   hideChecked: false, // optionally hide checked items
   searched: false, // if there was a search query 
@@ -15,11 +15,12 @@ const STORE = {
 };
 
 let SEARCH = [];
+let autoIncrement = 5;
 
 
 // ratchet templating
-function generateItemElement(item, itemIndex, template) {
-  const isEditing = STORE.editing === itemIndex;
+function generateItemElement(item, template) {
+  const isEditing = STORE.editing === item.id;
 
   const title = `
     <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">
@@ -27,7 +28,7 @@ function generateItemElement(item, itemIndex, template) {
     </span>`;
 
   const editBox = `
-    <input type="text" class="shopping-item-newname js-shopping-item-newname" id="newname-${itemIndex}">`;
+    <input type="text" class="shopping-item-newname js-shopping-item-newname" id="newname-${item.id}">`;
 
   const itemControls = `
     <div class="shopping-item-controls">
@@ -53,7 +54,7 @@ function generateItemElement(item, itemIndex, template) {
     </div>`;
 
   return `
-    <li class="js-item-index-element" data-item-index="${itemIndex}">
+    <li class="js-item-index-element" data-item-id="${item.id}">
       ${isEditing ? '' : title}
       ${isEditing ? editBox : ''}
       ${isEditing ? itemControlsEdit : itemControls}
@@ -65,7 +66,7 @@ function generateShoppingItemsString(shoppingList) {
   // if 'hide checked' option is enabled AND an item is checked, return false (filter it out)
   const items = shoppingList
     .filter(item => !(STORE.hideChecked && item.checked))
-    .map((item, index) => generateItemElement(item, index));
+    .map((item) => generateItemElement(item));
   
   return items.join('');
 }
@@ -79,7 +80,8 @@ function renderShoppingList() {
     $('.js-shopping-list').html(shoppingListItemsString);
 
     if(STORE.editing > -1) {
-      $(`#newname-${STORE.editing}`).val(STORE.items[STORE.editing].name);
+      //$(`#newname-${STORE.editing}`).val(STORE.items[STORE.editing].name);
+      $(`#newname-${STORE.editing}`).val(STORE.items.find(item => item.id === STORE.editing).name);
     }
   } else {
     $('.js-shopping-list').html('<p>Didn\'t find anything!</p>');
@@ -87,17 +89,17 @@ function renderShoppingList() {
 }
 
 // get index of selected DOM element
-function getItemIndexFromElement(el) {
+function getItemIdFromElement(el) {
   const itemIndexString = $(el)
     .closest('.js-item-index-element')
-    .attr('data-item-index');
+    .attr('data-item-id');
 
   return parseInt(itemIndexString, 10);
 }
 
 // form functions
 function addItemToShoppingList(itemName) {
-  STORE.items.push({name: itemName, checked: false});
+  STORE.items.push({id: autoIncrement++, name: itemName, checked: false});
 }
 
 function toggleHiddenItems() {
@@ -116,20 +118,34 @@ function searchClear() {
 }
 
 // list item functions
-function listItemToggleChecked(itemIndex) {
-  STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
+function listItemToggleChecked(itemId) {
+  //STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
+  let item = STORE.items.find(item => item.id === itemId);
+
+  item.checked = !item.checked;
 }
 
-function listItemEdit(itemIndex) {
-  STORE.editing = itemIndex;
+function listItemEdit(itemId) {
+  STORE.editing = itemId;
 }
 
-function listItemCancelEdit(itemIndex) {
+function listItemCancelEdit() {
   STORE.editing = -1;
 }
 
-function listItemDelete(itemIndex) {
-  STORE.items.splice(itemIndex, 1);
+function listItemDelete(itemId) {
+  // might be a tad bit outside the scope of this assignment ;)
+  // also delete the item from the search array too
+  let itemIndex = STORE.items.findIndex(item => item.id === itemId);
+  let searchItemIndex = SEARCH.findIndex(item => item.id === itemId);
+
+  if(itemIndex > -1) {
+    STORE.items.splice(itemIndex, 1);
+  }
+
+  if(searchItemIndex > -1) {
+    SEARCH.splice(searchItemIndex, 1);
+  }
 }
 
 
@@ -175,8 +191,8 @@ function handleSearchClear() {
 // item check off
 function handleItemCheck() {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
-    const itemIndex = getItemIndexFromElement(event.currentTarget);
-    listItemToggleChecked(itemIndex);
+    const itemId = getItemIdFromElement(event.currentTarget);
+    listItemToggleChecked(itemId);
 
     renderShoppingList();
   });
@@ -186,14 +202,14 @@ function handleItemCheck() {
 function handleItemEdit() {
   $('.js-shopping-list')
     .on('click', '.js-item-edit', event => {
-      const itemIndex = getItemIndexFromElement(event.currentTarget);
-      listItemEdit(itemIndex);
+      const itemId = getItemIdFromElement(event.currentTarget);
+      listItemEdit(itemId);
 
       renderShoppingList();
     })
     .on('click', '.js-item-edit-cancel', event => {
-      const itemIndex = getItemIndexFromElement(event.currentTarget);
-      listItemCancelEdit(itemIndex);
+      const itemId = getItemIdFromElement(event.currentTarget);
+      listItemCancelEdit(itemId);
 
       renderShoppingList();
     });
@@ -202,8 +218,8 @@ function handleItemEdit() {
 // item delete
 function handleItemDelete() {
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
-    const itemIndex = getItemIndexFromElement(event.currentTarget);
-    listItemDelete(itemIndex);
+    const itemId = getItemIdFromElement(event.currentTarget);
+    listItemDelete(itemId);
 
     renderShoppingList();
   });
