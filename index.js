@@ -55,8 +55,7 @@ function generateItemElement(item, template) {
 
   return `
     <li class="js-item-index-element" data-item-id="${item.id}">
-      ${isEditing ? '' : title}
-      ${isEditing ? editBox : ''}
+      ${isEditing ? editBox : title}
       ${isEditing ? itemControlsEdit : itemControls}
     </li>`;
 }
