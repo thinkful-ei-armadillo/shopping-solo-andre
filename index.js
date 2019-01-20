@@ -9,7 +9,7 @@ const STORE = {
     {name: 'milk', checked: true},
     {name: 'bread', checked: false}
   ],
-  hideCompleted: false
+  hideChecked: false
 };
 
 // templating
@@ -35,38 +35,40 @@ function generateItemElement(item, itemIndex, template) {
 function generateShoppingItemsString(shoppingList) {
   console.log('generated the shopping list html');
 
-  const items = shoppingList.map((item, index) => generateItemElement(item, index));
+  // if 'hide checked' option is enabled AND an item is checked, return false (filter it out)
+  const items = shoppingList
+    .filter(item => !(STORE.hideChecked && item.checked))
+    .map((item, index) => generateItemElement(item, index));
   
   return items.join('');
 }
 
 // generate html and write to the DOM
 function renderShoppingList() {
-  console.log('rendered the shopping list (renderShoppingList)');
-
   const shoppingListItemsString = generateShoppingItemsString(STORE.items);
+  console.log('rendered the shopping list (renderShoppingList)');
 
   $('.js-shopping-list').html(shoppingListItemsString);
 }
 
-// add an item to the data
+// get index of selected DOM element
+function getItemIndexFromElement(el) {
+  const itemIndexString = $(el)
+    .closest('.js-item-index-element')
+    .attr('data-item-index');
+
+  return parseInt(itemIndexString, 10);
+}
+
+// form functions
 function addItemToShoppingList(itemName) {
   console.log(`added "${itemName}" to item array`);
 
   STORE.items.push({name: itemName, checked: false});
 }
 
-// run when 'add item' form is submitted
-function handleNewItemSubmit() {
-  $('#js-shopping-list-form').submit(function(event) {
-    console.log('add item form submitted (handleNewItemSubmit)');
-
-    addItemToShoppingList($('.js-shopping-list-entry').val());
-    event.preventDefault();
-    event.currentTarget.reset();
-
-    renderShoppingList();
-  });
+function toggleHiddenItems() {
+  STORE.hideChecked = !STORE.hideChecked;
 }
 
 // list item functions
@@ -80,13 +82,27 @@ function listItemDelete(itemIndex) {
   STORE.items.splice(itemIndex, 1);
 }
 
-// get index of selected DOM element
-function getItemIndexFromElement(el) {
-  const itemIndexString = $(el)
-    .closest('.js-item-index-element')
-    .attr('data-item-index');
+// form listener: submit
+function handleNewItemSubmit() {
+  $('#js-shopping-list-form').submit(function(event) {
+    console.log('add item form submitted (handleNewItemSubmit)');
 
-  return parseInt(itemIndexString, 10);
+    addItemToShoppingList($('.js-shopping-list-entry').val());
+    event.preventDefault();
+    event.currentTarget.reset();
+
+    renderShoppingList();
+  });
+}
+
+// form listener: hide checked option
+function handleOptionHideChecked() {
+  $('#js-shopping-list-form').on('change', '#option-hide-checked', event => {
+    console.log('option changed: hide checked items (handleOptionHideChecked)');
+
+    toggleHiddenItems();
+    renderShoppingList();
+  });
 }
 
 // button press listener: check
@@ -115,6 +131,7 @@ function handleItemDelete() {
 function handleShoppingList() {
   renderShoppingList();
   handleNewItemSubmit();
+  handleOptionHideChecked();
   handleItemCheck();
   handleItemDelete();
 }
