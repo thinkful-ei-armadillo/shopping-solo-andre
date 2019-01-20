@@ -17,23 +17,46 @@ const STORE = {
 let SEARCH = [];
 
 
-// templating
+// ratchet templating
 function generateItemElement(item, itemIndex, template) {
+  const isEditing = STORE.editing === itemIndex;
+
+  const title = `
+    <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">
+      ${item.name}
+    </span>`;
+
+  const editBox = `
+    <input type="text" class="shopping-item-newname js-shopping-item-newname" id="newname-${itemIndex}">`;
+
+  const itemControls = `
+    <div class="shopping-item-controls">
+      <button class="shopping-item-toggle js-item-toggle">
+          <span class="button-label">check</span>
+      </button>
+      <button class="shopping-item-edit js-item-edit">
+        <span class="button-label">edit</span>
+      </button>
+      <button class="shopping-item-delete js-item-delete">
+          <span class="button-label">delete</span>
+      </button>
+    </div>`;
+  
+  const itemControlsEdit = `
+    <div class="shopping-item-controls">
+      <button class="shopping-item-edit js-item-edit">
+        <span class="button-label">save</span>
+      </button>
+      <button class="shopping-item-edit-cancel js-item-edit-cancel">
+        <span class="button-label">nevermind</span>
+      </button>
+    </div>`;
+
   return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
-      <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
-      <input type="text" class="shopping-item-newname ${STORE.editing === itemIndex ? '':'hidden'} js-shopping-item-newname" id="newname-${itemIndex}">
-      <div class="shopping-item-controls">
-        <button class="shopping-item-toggle js-item-toggle">
-            <span class="button-label">check</span>
-        </button>
-        <button class="shopping-item-edit js-item-edit">
-            <span class="button-label">edit</span>
-        </button>
-        <button class="shopping-item-delete js-item-delete">
-            <span class="button-label">delete</span>
-        </button>
-      </div>
+      ${isEditing ? '' : title}
+      ${isEditing ? editBox : ''}
+      ${isEditing ? itemControlsEdit : itemControls}
     </li>`;
 }
 
@@ -54,7 +77,7 @@ function renderShoppingList() {
 
   if(arr.length > 0) {
     $('.js-shopping-list').html(shoppingListItemsString);
-    
+
     if(STORE.editing > -1) {
       $(`#newname-${STORE.editing}`).val(STORE.items[STORE.editing].name);
     }
@@ -99,6 +122,10 @@ function listItemToggleChecked(itemIndex) {
 
 function listItemEdit(itemIndex) {
   STORE.editing = itemIndex;
+}
+
+function listItemCancelEdit(itemIndex) {
+  STORE.editing = -1;
 }
 
 function listItemDelete(itemIndex) {
@@ -157,12 +184,19 @@ function handleItemCheck() {
 
 // item edit
 function handleItemEdit() {
-  $('.js-shopping-list').on('click', '.js-item-edit', event => {
-    const itemIndex = getItemIndexFromElement(event.currentTarget);
-    listItemEdit(itemIndex);
+  $('.js-shopping-list')
+    .on('click', '.js-item-edit', event => {
+      const itemIndex = getItemIndexFromElement(event.currentTarget);
+      listItemEdit(itemIndex);
 
-    renderShoppingList();
-  });
+      renderShoppingList();
+    })
+    .on('click', '.js-item-edit-cancel', event => {
+      const itemIndex = getItemIndexFromElement(event.currentTarget);
+      listItemCancelEdit(itemIndex);
+
+      renderShoppingList();
+    });
 }
 
 // item delete
