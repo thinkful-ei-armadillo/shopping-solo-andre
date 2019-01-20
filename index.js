@@ -84,6 +84,12 @@ function searchShoppingList(arr, query) {
   SEARCH = arr.filter(item => item.name.indexOf(query) > -1);
 }
 
+function searchClear() {
+  $('.js-shopping-list-search').val('');
+  STORE.searched = false;
+  SEARCH = [];
+}
+
 // list item functions
 function listItemToggleChecked(itemIndex) {
   console.log(`toggled checked property for item at index ${itemIndex}`);
@@ -97,7 +103,8 @@ function listItemDelete(itemIndex) {
 
 
 
-// form listener: add item submit
+/* listeners */
+// add item
 function handleNewItemSubmit() {
   $('#js-shopping-list-form').submit(function(event) {
     console.log('add item form submitted (handleNewItemSubmit)');
@@ -110,7 +117,7 @@ function handleNewItemSubmit() {
   });
 }
 
-// form listener: hide checked option
+// hide checked option
 function handleOptionHideChecked() {
   $('#js-shopping-list-form').on('change', '#option-hide-checked', event => {
     console.log('option changed: hide checked items (handleOptionHideChecked)');
@@ -120,7 +127,7 @@ function handleOptionHideChecked() {
   });
 }
 
-// form listener: search submit
+// search
 function handleSearchSubmit() {
   $('#js-shopping-list-search').submit(event => {
     console.log('searched for item (handleSearchSubmit)');
@@ -132,7 +139,17 @@ function handleSearchSubmit() {
   });
 }
 
-// button press listener: check
+// search clear
+function handleSearchClear() {
+  $('#js-shopping-list-search').on('click', '.search-clear', event => {
+    console.log('cleared search (handleSearchClear)');
+
+    searchClear();
+    renderShoppingList();
+  });
+}
+
+// item check off
 function handleItemCheck() {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     console.log('check button pressed (handleItemCheckClicked)');
@@ -143,7 +160,7 @@ function handleItemCheck() {
   });
 }
 
-// button press listener: delete
+// item delete
 function handleItemDelete() {
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
     console.log('delete button pressed (handleDeleteItemClicked)');
@@ -160,6 +177,7 @@ function handleShoppingList() {
   handleNewItemSubmit();
   handleOptionHideChecked();
   handleSearchSubmit();
+  handleSearchClear();
   handleItemCheck();
   handleItemDelete();
 }
