@@ -179,7 +179,7 @@ function handleOptionHideChecked() {
 
 // search
 function handleSearchSubmit() {
-  $('#js-shopping-list-search').submit(event => {
+  $('#js-shopping-list-search').on('keyup', '.js-shopping-list-search', event => {
     event.preventDefault();
 
     searchShoppingList(STORE.items, $('.js-shopping-list-search').val());
