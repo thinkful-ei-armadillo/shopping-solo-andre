@@ -88,7 +88,7 @@ function renderShoppingList() {
   }
 }
 
-// get index of selected DOM element
+// get item id of selected DOM element
 function getItemIdFromElement(el) {
   const itemIndexString = $(el)
     .closest('.js-item-index-element')
@@ -137,7 +137,7 @@ function listItemEditSave(itemId, newName) {
 }
 
 function listItemCancelEdit() {
-  STORE.editing = -1;
+  STORE.editing = 0;
 }
 
 function listItemDelete(itemId) {
@@ -158,56 +158,49 @@ function listItemDelete(itemId) {
 
 
 /* listeners */
-// add item
-function handleNewItemSubmit() {
-  $('#js-shopping-list-form').submit(function(event) {
-    addItemToShoppingList($('.js-shopping-list-entry').val());
-    event.preventDefault();
-    event.currentTarget.reset();
+function handleForm() {
+  $('#js-shopping-list-form')
+    // add item
+    .submit(event => {
+      addItemToShoppingList($('.js-shopping-list-entry').val());
+      event.preventDefault();
+      event.currentTarget.reset();
 
-    renderShoppingList();
-  });
-}
-
-// hide checked option
-function handleOptionHideChecked() {
-  $('#js-shopping-list-form').on('change', '#option-hide-checked', event => {
-    toggleHiddenItems();
-    renderShoppingList();
-  });
+      renderShoppingList();
+    })
+    // 'hide checked' option
+    .on('change', '#option-hide-checked', event => {
+      toggleHiddenItems();
+      renderShoppingList();
+    });
 }
 
 // search
-function handleSearchSubmit() {
-  $('#js-shopping-list-search').on('keyup', '.js-shopping-list-search', event => {
-    event.preventDefault();
+function handleSearchInput() {
+  $('#js-shopping-list-search')
+    .on('keyup', '.js-shopping-list-search', event => {
+      event.preventDefault();
 
-    searchShoppingList(STORE.items, $('.js-shopping-list-search').val());
-    renderShoppingList();
-  });
+      searchShoppingList(STORE.items, $('.js-shopping-list-search').val());
+      renderShoppingList();
+    })
+    .on('click', '.search-clear', event => {
+      searchClear() ;
+      renderShoppingList();
+    });
 }
 
-// search clear
-function handleSearchClear() {
-  $('#js-shopping-list-search').on('click', '.search-clear', event => {
-    searchClear();
-    renderShoppingList();
-  });
-}
-
-// item check off
-function handleItemCheck() {
-  $('.js-shopping-list').on('click', '.js-item-toggle', event => {
-    const itemId = getItemIdFromElement(event.currentTarget);
-    listItemToggleChecked(itemId);
-
-    renderShoppingList();
-  });
-}
-
-// item edit
-function handleItemEdit() {
+// list item buttons
+function handleItemControls() {
   $('.js-shopping-list')
+    // item check off
+    .on('click', '.js-item-toggle', event => {
+      const itemId = getItemIdFromElement(event.currentTarget);
+      listItemToggleChecked(itemId);
+
+      renderShoppingList();
+    })
+    // item edit
     .on('click', '.js-item-edit', event => {
       const itemId = getItemIdFromElement(event.currentTarget);
       listItemEdit(itemId);
@@ -225,29 +218,23 @@ function handleItemEdit() {
       listItemCancelEdit(itemId);
 
       renderShoppingList();
+    })
+    // item delete
+    .on('click', '.js-item-delete', event => {
+      const itemId = getItemIdFromElement(event.currentTarget);
+      listItemDelete(itemId);
+  
+      renderShoppingList();
     });
-}
-
-// item delete
-function handleItemDelete() {
-  $('.js-shopping-list').on('click', '.js-item-delete', event => {
-    const itemId = getItemIdFromElement(event.currentTarget);
-    listItemDelete(itemId);
-
-    renderShoppingList();
-  });
 }
 
 // main function. handle initial render and event listeners
 function handleShoppingList() {
   renderShoppingList();
-  handleNewItemSubmit();
-  handleOptionHideChecked();
-  handleSearchSubmit();
-  handleSearchClear();
-  handleItemCheck();
-  handleItemEdit();
-  handleItemDelete();
+
+  handleForm();
+  handleSearchInput();
+  handleItemControls();
 }
 
 $(handleShoppingList);
