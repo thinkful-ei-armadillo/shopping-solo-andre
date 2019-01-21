@@ -7,7 +7,8 @@ const STORE = {
     {id: 1, name: 'koolaid', checked: false},
     {id: 2, name: 'frosted flakes', checked: false},
     {id: 3, name: 'milk', checked: true},
-    {id: 4, name: 'bread', checked: false}
+    {id: 4, name: 'bread', checked: false},
+    {id: 5, name: 'bread', checked: false},
   ],
   hideChecked: false, // optionally hide checked items
   searched: false, // if there was a search query 
@@ -15,7 +16,7 @@ const STORE = {
 };
 
 let SEARCH = [];
-let autoIncrement = 5;
+let autoIncrement = 6;
 
 
 // ratchet templating
@@ -102,7 +103,9 @@ function addItemToShoppingList(itemName) {
 }
 
 function toggleHiddenItems() {
-  STORE.hideChecked = !STORE.hideChecked;
+  // grab the value of the 'hide checked' option instead of just inverting STORE.hideChecked
+  // this prevents unexpected behavior
+  STORE.hideChecked = $('#option-hide-checked').prop('checked');
 }
 
 function searchShoppingList(arr, query) {
@@ -159,11 +162,12 @@ function listItemDelete(itemId) {
 /* listeners */
 function handleForm() {
   $('#js-shopping-list-form')
-    // add item
+    // add item submit
     .submit(event => {
       addItemToShoppingList($('.js-shopping-list-entry').val());
       event.preventDefault();
       event.currentTarget.reset();
+      $('#option-hide-checked').prop('checked', STORE.hideChecked); // prevent form submit resetting option value
 
       renderShoppingList();
     })
